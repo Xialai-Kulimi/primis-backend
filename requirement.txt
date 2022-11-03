@@ -2,4 +2,4 @@ rich
 pymongo
 redis
 fastapi
-
+uvicorn

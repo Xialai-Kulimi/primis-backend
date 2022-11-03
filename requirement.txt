@@ -1,0 +1,5 @@
+rich
+pymongo
+redis
+fastapi
+

@@ -1,4 +1,4 @@
 # dev
 ```
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```

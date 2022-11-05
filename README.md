@@ -2,7 +2,7 @@
 
 ## dev
 ```
-uvicorn backend.main:app --reload
+uvicorn backend.__main__:app --reload
 ```
 
 ## src
@@ -12,9 +12,7 @@ uvicorn backend.main:app --reload
     |   __main__.py
     |   __init__.py
     |
-    |
     +---routers
-    |       auth.py
     |       entity.py
     |       ws.py
     |       __init__.py

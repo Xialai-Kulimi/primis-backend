@@ -4,3 +4,4 @@ redis
 fastapi
 uvicorn
 uvicorn[standard]
+python-dotenv

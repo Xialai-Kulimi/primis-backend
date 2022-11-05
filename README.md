@@ -9,12 +9,9 @@ uvicorn backend.main:app --reload
 ```
 ----backend
     |   dependencies.py
-    |   main.py
+    |   __main__.py
     |   __init__.py
     |
-    +---internal
-    |       chat.py
-    |       __init__.py
     |
     +---routers
     |       auth.py

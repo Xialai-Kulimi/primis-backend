@@ -5,3 +5,4 @@ fastapi
 uvicorn
 uvicorn[standard]
 python-dotenv
+itsdangerous

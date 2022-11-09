@@ -1,4 +1,13 @@
-from fastapi import APIRouter, HTTPException
+
+from typing import List
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+import asyncio
+from backend.utils.console import console
+from datetime import datetime
+from backend.controller import controller
+
+manager = controller.manager.manager
 
 
 router = APIRouter(
@@ -8,28 +17,77 @@ router = APIRouter(
 )
 
 
-fake_items_db = {"plumbus": {"name": "Plumbus"}, "gun": {"name": "Portal Gun"}}
 
 
-@router.get("/")
-async def read_items():
-    return fake_items_db
 
 
-@router.get("/{item_id}")
-async def read_item(item_id: str):
-    if item_id not in fake_items_db:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return {"name": fake_items_db[item_id]["name"], "item_id": item_id}
 
 
-@router.put(
-    "/{item_id}",
-    responses={403: {"description": "Operation forbidden"}},
-)
-async def update_item(item_id: str):
-    if item_id != "plumbus":
-        raise HTTPException(
-            status_code=403, detail="You can only update the item: plumbus"
-        )
-    return {"item_id": item_id, "name": "The great Plumbus"}
+@router.websocket("/")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+
+            data = await websocket.receive_json()
+            console.log(data)
+            if data.get('content'):
+                await websocket.send_json({'type': 'caption', 'message': [{'class': '', 'message': f'你說：「{data["content"]}」'}, ]})
+            await websocket.send_json({'type': 'caption', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
+            await websocket.send_json({'type': 'surrounding', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
+            await websocket.send_json({'type': 'status', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
+            await websocket.send_json({
+                'type': 'target',
+                'buttons': [
+                    {
+                        'text': 'text1',
+                        'id': 'btn1',
+                        'color': 'primary',
+                        'list': [
+                            {'text': 'text', 'value': 'value'},
+                            {'text': 'text2', 'value': 'value2'},
+                            {'text': 'text3', 'value': 'value3'},
+                        ]
+                    },
+                    {
+                        'text': 'text2',
+                        'id': 'btn2',
+                        'color': 'error',
+                        'list': [
+                            {'text': 'text', 'value': 'value'},
+                            {'text': 'text2', 'value': 'value2'},
+                            {'text': 'text3', 'value': 'value3'},
+                        ]
+                    },
+                ]
+            })
+            await websocket.send_json({
+                'type': 'reachable',
+                'buttons': [
+                    {
+                        'text': 'text1',
+                        'id': 'btn3231',
+                        'color': 'primary',
+                        'list': [
+                            {'text': 'text', 'value': 'value'},
+                            {'text': 'text2', 'value': 'value2'},
+                            {'text': 'text3', 'value': 'value3'},
+                        ]
+                    },
+                    {
+                        'text': 'text2',
+                        'id': 'btn22323',
+                        'color': 'info',
+                        'list': [
+                            {'text': 'text', 'value': 'value78'},
+                            {'text': 'text2', 'value': 'value27878'},
+                            {'text': 'text3', 'value': 'value37878'},
+                        ]
+                    },
+                ]
+            })
+            # await manager.send_personal_message(f"You wrote: {data}", websocket)
+            # await manager.broadcast(f"Client #{client_id} says: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        # await manager.broadcast(f"Client #{client_id} left the chat")

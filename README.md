@@ -2,7 +2,7 @@
 
 ## dev
 ```
-uvicorn backend.__main__:app --reload
+uvicorn backend.__main__:app --reload --port 8000
 ```
 
 ## src

@@ -29,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket, cookie_or_token: str = Depend
     2. create client instance
     3. append to manager
 
-    4. send receive datat to handler
+    4. send receive data to handler (loop)
 
     Args:
         websocket (WebSocket): websocket (wss://)

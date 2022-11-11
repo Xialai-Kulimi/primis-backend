@@ -48,7 +48,6 @@ async def websocket_endpoint(websocket: WebSocket, cookie_or_token: str = Depend
     try:
         while True:
             data = await websocket.receive_json()
-            console.log(f'[{client.user.raw_data.username}]: {data}')
             await handler(client, data)
             
     except WebSocketDisconnect:

@@ -1,13 +1,17 @@
-
-from typing import List
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-
 import asyncio
-from backend.utils.console import console
+from typing import List
 from datetime import datetime
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+
+from backend.utils.console import console
 from backend.controller import controller
 
+from backend.dependencies import get_cookie_or_token
+from backend.auth import User, ClientInfo, Client
+
 manager = controller.manager.manager
+handler = controller.handler.handler
 
 
 router = APIRouter(
@@ -17,77 +21,35 @@ router = APIRouter(
 )
 
 
-
-
-
-
-
-
 @router.websocket("/")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_endpoint(websocket: WebSocket, cookie_or_token: str = Depends(get_cookie_or_token)):
+    """websocket entry endpoint
+
+    1. validate the token
+    2. create client instance
+    3. append to manager
+
+    4. send receive datat to handler
+
+    Args:
+        websocket (WebSocket): websocket (wss://)
+        cookie_or_token (str, optional): should be token
+
+    Raises:
+        HTTPException: when the token is invalid
+    """
+
+
+    client_info = ClientInfo(token=cookie_or_token)
+    client = Client(websocket, client_info)
+    if not client.user.valid:
+        raise HTTPException(status_code=403, detail="invalid token")
+    await manager.connect(client)
     try:
         while True:
-
             data = await websocket.receive_json()
-            console.log(data)
-            if data.get('content'):
-                await websocket.send_json({'type': 'caption', 'message': [{'class': '', 'message': f'你說：「{data["content"]}」'}, ]})
-            await websocket.send_json({'type': 'caption', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
-            await websocket.send_json({'type': 'surrounding', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
-            await websocket.send_json({'type': 'status', 'message': [{'class': 'primary--text', 'message': 'primary color test'}, ]})
-            await websocket.send_json({
-                'type': 'target',
-                'buttons': [
-                    {
-                        'text': 'text1',
-                        'id': 'btn1',
-                        'color': 'primary',
-                        'list': [
-                            {'text': 'text', 'value': 'value'},
-                            {'text': 'text2', 'value': 'value2'},
-                            {'text': 'text3', 'value': 'value3'},
-                        ]
-                    },
-                    {
-                        'text': 'text2',
-                        'id': 'btn2',
-                        'color': 'error',
-                        'list': [
-                            {'text': 'text', 'value': 'value'},
-                            {'text': 'text2', 'value': 'value2'},
-                            {'text': 'text3', 'value': 'value3'},
-                        ]
-                    },
-                ]
-            })
-            await websocket.send_json({
-                'type': 'reachable',
-                'buttons': [
-                    {
-                        'text': 'text1',
-                        'id': 'btn3231',
-                        'color': 'primary',
-                        'list': [
-                            {'text': 'text', 'value': 'value'},
-                            {'text': 'text2', 'value': 'value2'},
-                            {'text': 'text3', 'value': 'value3'},
-                        ]
-                    },
-                    {
-                        'text': 'text2',
-                        'id': 'btn22323',
-                        'color': 'info',
-                        'list': [
-                            {'text': 'text', 'value': 'value78'},
-                            {'text': 'text2', 'value': 'value27878'},
-                            {'text': 'text3', 'value': 'value37878'},
-                        ]
-                    },
-                ]
-            })
-            # await manager.send_personal_message(f"You wrote: {data}", websocket)
-            # await manager.broadcast(f"Client #{client_id} says: {data}")
+            console.log(f'[{client.user.raw_data.username}]: {data}')
+            handler(client, data)
+            
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        # await manager.broadcast(f"Client #{client_id} left the chat")

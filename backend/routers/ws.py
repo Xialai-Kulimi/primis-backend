@@ -2,7 +2,7 @@ import asyncio
 from typing import List
 from datetime import datetime
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
 
 from backend.utils.console import console
 from backend.controller import controller

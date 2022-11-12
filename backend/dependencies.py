@@ -10,11 +10,11 @@ async def login(session: Union[str, None]= Cookie(default=None)):
 async def check_have_discord_id(request: Request):
     return request.session.get("session", None)
 
-async def get_cookie_or_token(
-    websocket: WebSocket,
-    session: Union[str, None] = Cookie(default=None),
-    token: Union[str, None] = Query(default=None),
+async def get_token(
+    websocket: WebSocket = None,
+    token: str | None = Cookie(default=None),
 ):
-    if session is None and token is None:
+    console.log(token)
+    if token is None:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-    return session or token
+    return token

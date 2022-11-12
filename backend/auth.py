@@ -4,6 +4,10 @@ from fastapi import WebSocket
 from pydantic import BaseModel
 
 from backend.utils.mongo import global_db
+from backend.utils.console import console
+
+
+user_collection = global_db.user
 
 class ClientInfo(BaseModel):
     token: str
@@ -13,7 +17,7 @@ class ClientInfo(BaseModel):
 class User():
     def __init__(self, token: str) -> None:
         
-        self.raw_data: global_db.user.find_one({'token': token})
+        self.raw_data = user_collection.find_one({'token': token})
         if self.raw_data == None:
             self.valid = False
         else:

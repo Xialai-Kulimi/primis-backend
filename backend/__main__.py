@@ -16,4 +16,5 @@ app.include_router(ws.router)
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(controller.main.main())
+    for t in controller.main.loop_list:
+        asyncio.create_task(t())

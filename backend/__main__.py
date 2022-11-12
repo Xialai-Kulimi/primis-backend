@@ -8,9 +8,8 @@ from backend.dependencies import login
 from backend.routers import ws
 from backend.controller import controller
 
-app = FastAPI(dependencies=[Depends(login)])
-app.add_middleware(SessionMiddleware,
-                   secret_key=getenv("OAUTH2_CLIENT_SECRET"))
+app = FastAPI()
+# app.add_middleware(SessionMiddleware, secret_key=getenv("OAUTH2_CLIENT_SECRET"))
 app.include_router(ws.router)
 
 

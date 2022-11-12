@@ -52,4 +52,4 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
             await handler(client, data)
             
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(client)

@@ -3,6 +3,8 @@ from typing import List
 from datetime import datetime
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi.responses import RedirectResponse
+from pydantic.error_wrappers import ValidationError
 
 from backend.dependencies import get_token
 from backend.auth import User, ClientInfo, Client
@@ -23,6 +25,7 @@ router = APIRouter(
 #     console.log(cookie_or_token)
 #     return HTTPException(status_code=404)
 
+
 @router.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_token)):
     """websocket entry endpoint
@@ -40,16 +43,20 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
     Raises:
         HTTPException: when the token is invalid
     """
-
-    client_info = ClientInfo(token=token)
-    client = Client(websocket, client_info)
+    try:
+        client_info = ClientInfo(token=token)
+        client = Client(websocket, client_info)
+    except ValidationError:
+        return RedirectResponse("/api/auth/me")
     if not client.user.valid:
-        raise HTTPException(status_code=403, detail="invalid token")
+        return RedirectResponse("/api/auth/login")
+
+    console.log('login: ', client.user.raw_data.get('username', 'no_username'))
     await manager.connect(client)
     try:
         while True:
             data = await websocket.receive_json()
             await handler(client, data)
-            
+
     except WebSocketDisconnect:
         manager.disconnect(client)

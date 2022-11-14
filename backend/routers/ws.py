@@ -53,10 +53,18 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
 
     console.log('login: ', client.user.raw_data.get('username', 'no_username'))
     await manager.connect(client)
-    try:
-        while True:
-            data = await websocket.receive_json()
-            await handler(client, data)
-
-    except WebSocketDisconnect:
+    async def read_from_socket(websocket: WebSocket):
+        # nonlocal json_data
+        try:
+            async for data in websocket.iter_json():
+            # json_data = data
+                await handler(client, data)
+        except WebSocketDisconnect:
+            console.log('disconnect: ', client.user.raw_data.get('username', 'no_username'))
+            manager.disconnect(client)
+        console.log('disconnect: ', client.user.raw_data.get('username', 'no_username'))
         manager.disconnect(client)
+
+    handle_loop = asyncio.create_task(read_from_socket(websocket))
+    
+    await asyncio.gather(handle_loop)

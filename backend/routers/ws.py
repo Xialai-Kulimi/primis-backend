@@ -1,13 +1,11 @@
 import asyncio
-from typing import List
-from datetime import datetime
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import RedirectResponse
 from pydantic.error_wrappers import ValidationError
 
 from backend.dependencies import get_token
-from backend.auth import User, ClientInfo, Client
+from backend.auth import ClientInfo, Client
 
 from backend.controller import controller
 console = controller.utils.console.console
@@ -58,7 +56,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
         try:
             async for data in websocket.iter_json():
             # json_data = data
-                await handler(client, data)
+                try:
+                    await handler(client, data)
+                except Exception:
+                    console.print_exception(show_locals=True)
         except WebSocketDisconnect:
             console.log('disconnect: ', client.user.raw_data.get('username', 'no_username'))
             await manager.disconnect(client)

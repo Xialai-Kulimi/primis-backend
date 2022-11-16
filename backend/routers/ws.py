@@ -10,7 +10,7 @@ from backend.dependencies import get_token
 from backend.auth import User, ClientInfo, Client
 
 from backend.controller import controller
-console = controller.utils.console
+console = controller.utils.console.console
 manager = controller.manager.manager
 handler = controller.handler.handler
 

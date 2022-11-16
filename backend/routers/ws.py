@@ -61,10 +61,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
                 await handler(client, data)
         except WebSocketDisconnect:
             console.log('disconnect: ', client.user.raw_data.get('username', 'no_username'))
-            manager.disconnect(client)
+            await manager.disconnect(client)
         console.log('disconnect: ', client.user.raw_data.get('username', 'no_username'))
-        manager.disconnect(client)
+        await manager.disconnect(client)
 
     handle_loop = asyncio.create_task(read_from_socket(websocket))
-    
+
     await asyncio.gather(handle_loop)

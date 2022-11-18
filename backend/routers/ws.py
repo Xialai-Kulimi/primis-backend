@@ -57,7 +57,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
             async for data in websocket.iter_json():
             # json_data = data
                 try:
-                    await handler(client, data)
+                    asyncio.gather(handler(client, data))
                 except Exception:
                     console.print_exception(show_locals=True)
         except WebSocketDisconnect:

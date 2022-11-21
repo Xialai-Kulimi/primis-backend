@@ -6,3 +6,5 @@ uvicorn
 uvicorn[standard]
 python-dotenv
 itsdangerous
+matplotlib
+packaging

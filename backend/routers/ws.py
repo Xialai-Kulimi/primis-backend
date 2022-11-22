@@ -49,6 +49,21 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
     if not client.user.valid:
         return RedirectResponse("/api/auth/login")
 
+    if client.user.raw_data.get('create_time', 0) > 1668932432 and not client.user.raw_data.get('allow_beta'):
+        await client.websocket.accept()
+        try:
+            while True:
+                await client.websocket.send_json({'type': 'operation', 'list': {
+                        'title': "很抱歉",
+                        'subtitle': "現在正在封測中",
+                        'persistent': True,
+                        'id': "",
+                        'list': [],
+                    }})
+                await asyncio.sleep(696969)
+        except WebSocketDisconnect:
+            pass
+
     console.log('login: ', client.user.raw_data.get('username', 'no_username'))
     await manager.connect(client)
     async def read_from_socket(websocket: WebSocket):
